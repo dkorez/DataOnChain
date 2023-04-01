@@ -5,6 +5,82 @@
 		"type": "constructor"
 	},
 	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "AuthorityAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "AuthorityRemoved",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bytes32",
+				"name": "",
+				"type": "bytes32"
+			},
+			{
+				"indexed": false,
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "DocumentCreated",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "auth",
+				"type": "address"
+			}
+		],
+		"name": "addAuthority",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "string",
@@ -86,14 +162,8 @@
 				"type": "bytes32"
 			}
 		],
-		"name": "generateDocumentSalt",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
+		"name": "generateDocumentSecret",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
@@ -110,14 +180,8 @@
 				"type": "address"
 			}
 		],
-		"name": "generateDocumentSaltForUser",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
+		"name": "generateDocumentSecretForUser",
+		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
@@ -129,7 +193,7 @@
 				"type": "uint256"
 			}
 		],
-		"name": "getDocumentContent",
+		"name": "getDocument",
 		"outputs": [
 			{
 				"internalType": "string",
@@ -153,22 +217,12 @@
 				"type": "bytes"
 			}
 		],
-		"name": "getDocumentContentByHash",
+		"name": "getDocumentContent",
 		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			},
 			{
 				"internalType": "string",
 				"name": "",
 				"type": "string"
-			},
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
 			}
 		],
 		"stateMutability": "view",
@@ -196,31 +250,12 @@
 	{
 		"inputs": [
 			{
-				"internalType": "bytes32",
-				"name": "uuid",
-				"type": "bytes32"
-			}
-		],
-		"name": "getDocumentSalt",
-		"outputs": [
-			{
-				"internalType": "bytes32",
-				"name": "",
-				"type": "bytes32"
-			}
-		],
-		"stateMutability": "view",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
 				"internalType": "address",
 				"name": "user",
 				"type": "address"
 			}
 		],
-		"name": "getUserDocumentHashes",
+		"name": "getDocumentHashesForUser",
 		"outputs": [
 			{
 				"internalType": "bytes32[]",
@@ -234,32 +269,33 @@
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "user",
-				"type": "address"
+				"internalType": "bytes32",
+				"name": "uuid",
+				"type": "bytes32"
 			}
 		],
-		"name": "getUserDocuments",
+		"name": "getDocumentSecret",
 		"outputs": [
 			{
-				"components": [
-					{
-						"internalType": "bytes32",
-						"name": "uuid",
-						"type": "bytes32"
-					},
-					{
-						"internalType": "bytes32",
-						"name": "contentHash",
-						"type": "bytes32"
-					}
-				],
-				"internalType": "struct DataOnChain.UserDocument[]",
+				"internalType": "bytes32",
 				"name": "",
-				"type": "tuple[]"
+				"type": "bytes32"
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "auth",
+				"type": "address"
+			}
+		],
+		"name": "removeAuthority",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ]

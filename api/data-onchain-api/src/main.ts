@@ -7,22 +7,6 @@ async function bootstrap() {
     rawBody: true,
   });
 
-  app.use(rawBodyParser);
-
   await app.listen(3000);
 }
 bootstrap();
-
-const rawBodyParser = function (req, res, next) {
-  req.rawData = '';
-  if (req.header('content-type') == 'text/plain') {
-    req.on('data', function (chunk) {
-      req.rawData += chunk;
-    });
-    req.on('end', function () {
-      next();
-    });
-  } else {
-    next();
-  }
-};

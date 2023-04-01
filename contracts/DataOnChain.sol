@@ -2,8 +2,6 @@
 
 pragma solidity ^0.8.5;
 
-//import "@openzeppelin/contracts/access/AccessControl.sol";
-
 contract DataOnChain {
     struct Document {
         bytes contentHash;
@@ -15,11 +13,6 @@ contract DataOnChain {
         address owner;
     }
 
-    struct UserDocument {
-        bytes32 uuid;
-        bytes32 contentHash;
-    }
-
     mapping(address => Document[]) public documents;
 
     mapping(bytes32 => DocumentHash) private documentHashes;
@@ -29,20 +22,17 @@ contract DataOnChain {
     address[] public authorities;
     uint256 private authoritiesCount;
 
+    event DocumentCreated(address indexed, bytes32, address);
 
-    // store user data
-
-    // validate user data -> encode off chain, store hash, 
-
+    event AuthorityAdded(address indexed, address);
+    event AuthorityRemoved(address indexed, address);
 
     constructor() {
         authorities.push(msg.sender);
         authoritiesCount++;
     }
 
-    //TODO: add / remove authorities
-
-    /* save full document content */
+    /* save full document content, not gas optimised */
     function getDocumentHash(uint index) public view returns(bytes memory) {
         Document memory document = documents[msg.sender][index];
         require((document.owner == msg.sender || isAuthority(msg.sender)), "NOT_AUTHORISED");
@@ -50,7 +40,7 @@ contract DataOnChain {
         return documents[msg.sender][index].contentHash;
     }
 
-    function getDocumentContent(uint index) public view returns(string memory) {
+    function getDocument(uint index) public view returns(string memory) {
         bytes memory documentContent = getDocumentHash(index);
         return abi.decode(documentContent, (string));
     }
@@ -65,24 +55,24 @@ contract DataOnChain {
 
         documents[msg.sender].push(Document(documentContent, msg.sender));
     }
+    /* end of save full document content */
 
-
-    /* save hashes only */
-    function generateDocumentSaltForUser(bytes32 uuid, address user) public returns(bytes32) {
+    /* save hashes only, gas optimised functions */
+    function generateDocumentSecretForUser(bytes32 uuid, address user) public {
         bytes32 contentHash = bytes32(keccak256(abi.encodePacked(uuid, block.timestamp, block.number)));
 
         documentHashes[uuid] = DocumentHash(contentHash, user);
         userHashes[userHashesIndex] = uuid;
         userHashesIndex++;
 
-        return contentHash;
+        emit DocumentCreated(user, uuid, msg.sender);
     }
 
-    function generateDocumentSalt(bytes32 uuid) public returns(bytes32) {
-        return generateDocumentSaltForUser(uuid, msg.sender);
+    function generateDocumentSecret(bytes32 uuid) public {
+        generateDocumentSecretForUser(uuid, msg.sender);
     }
 
-    function getDocumentSalt(bytes32 uuid) public view returns(bytes32) {
+    function getDocumentSecret(bytes32 uuid) public view returns(bytes32) {
         DocumentHash memory document = documentHashes[uuid];
 
         require((document.owner == msg.sender || isAuthority(msg.sender)), "NOT_AUTHORISED");
@@ -90,7 +80,22 @@ contract DataOnChain {
         return document.contentHash;
     }
 
-    function getUserDocumentHashes(address user) public view returns(bytes32[] memory) {
+    function getDocumentContent(bytes32 uuid, bytes memory payload) public view returns(string memory) {
+        (bytes memory _uuid, string memory _content, bytes memory _secret) = abi.decode(payload, (bytes, string, bytes));
+
+        DocumentHash memory document = documentHashes[uuid];
+        bytes32 secret = document.contentHash;
+        
+        bytes memory bSecret = bytes.concat(secret);
+        bytes memory bUuid = bytes.concat(uuid);
+
+        require(keccak256(_uuid) == keccak256(bUuid), "UUID_NOT_MATCH");
+        require(keccak256(_secret) == keccak256(bSecret), "SECRET_NOT_MATCH");
+
+        return (_content);
+    }
+
+    function getDocumentHashesForUser(address user) public view returns(bytes32[] memory) {
         bytes32[] memory _userHashes = new bytes32[](getUserDocumentCount(user));
 
         uint256 j = 0;
@@ -104,39 +109,62 @@ contract DataOnChain {
 
         return _userHashes;
     }
+    /* end save hashes only */
 
-    function getUserDocuments(address user) public view returns(UserDocument[] memory) {
-        UserDocument[] memory _userDocuments = new UserDocument[](getUserDocumentCount(user));
+    /* functions to manage authorities */
+    function isAuthority(address caller) private view returns(bool) {
+        for (uint256 i=0; i<authoritiesCount; i++) {
+            if (caller == authorities[authoritiesCount]) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-        uint256 j = 0;
-        for (uint256 i=0; i<userHashesIndex; i++) {
-            bytes32 userHash = userHashes[i];
-            if (documentHashes[userHash].owner == user) {
-                _userDocuments[j] = UserDocument(userHash, documentHashes[userHash].contentHash);
-                j++;
+    function addAuthority(address auth) public {
+        require(isAuthority(msg.sender), "NOT_AUTHORISED");
+
+        bool authFound = false;
+        for (uint i=0; i<authoritiesCount; i++) {
+            if (authorities[i] == auth) {
+                authFound = true;
+                break;
             }
         }
 
-        return _userDocuments;
+        require(authFound == false, "AUTHORITY_EXISTS");
+        authorities.push(auth);
+        authoritiesCount++;
+        emit AuthorityAdded(auth, msg.sender);
     }
 
-    /** TODO: refactor, unneccessary */
-    function getDocumentContentByHash(bytes32 uuid, bytes memory payload) public view returns(bytes32, string memory, bytes32) {
-        (bytes32 _uuid, string memory _content, bytes32 _salt) = abi.decode(payload, (bytes32, string, bytes32));
+    function removeAuthority(address auth) public {
+        require(isAuthority(msg.sender), "NOT_AUTHORISED");
+        require(authoritiesCount >= 1, "ONE_AUTHORITY_REQUIRED");
 
-        //DocumentHash memory document = documentHashes[uuid];
-        //bytes32 salt = document.contentHash;
-        //require(_uuid == uuid && _salt == salt, "ENCODE NOT MATCH");
+        bool authFound = false;
+        uint256 authIndex = 0;
+        for (uint i=0; i<authoritiesCount; i++) {
+            if (authorities[i] == auth) {
+                authFound = true;
+                authIndex = i;
+                break;
+            }
+        }
+        require(authFound == true, "AUTHORITY_NOT_FOUND");
 
-        return (_uuid, _content, _salt);
+        if (authIndex < authoritiesCount) {
+            for (uint i=authIndex; i<authoritiesCount-1; i++) {
+                authorities[i] = authorities[i+1];
+            }
+            authorities.pop();
+            authoritiesCount--;
+        }
+
+        emit AuthorityRemoved(auth, msg.sender);
     }
 
-
-    /** Helper functions */
-    function generateUUID() private view returns(bytes32) {
-        return bytes32(keccak256(abi.encodePacked(block.timestamp, block.number, msg.sender)));
-    }
-
+    /* helper functions */
     function getUserDocumentCount(address user) private view returns(uint256) {
         uint256 docCount = 0;
         for (uint256 i=0; i<userHashesIndex; i++) {
@@ -145,17 +173,7 @@ contract DataOnChain {
                 docCount++;
             }
         }
-
         return docCount;
     }
-
-    function isAuthority(address caller) private view returns(bool) {
-        for (uint256 i=0; i<authoritiesCount; i++) {
-            if (caller == authorities[authoritiesCount]) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+    /* end helper functions */
 }

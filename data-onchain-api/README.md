@@ -22,3 +22,5 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+
+Once the application is running, visit `http://localhost:3000/api` to view the documentation

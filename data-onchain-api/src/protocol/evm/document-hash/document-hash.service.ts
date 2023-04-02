@@ -39,6 +39,7 @@ export class DocumentHashService extends DocumentService {
 
       return {
         uuid: uuid,
+        content: encodedContent,
       };
     } catch (err) {
       this.logger.error(

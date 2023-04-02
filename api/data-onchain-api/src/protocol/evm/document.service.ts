@@ -1,4 +1,9 @@
-import { Inject, Injectable, Scope } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Scope,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Contract, ethers } from 'ethers';
 import { REQUEST } from '@nestjs/core';
@@ -37,6 +42,10 @@ export class DocumentService {
   protected getContract(): Contract {
     const { headers } = this.request;
     const signerKey = headers['signer-key'] as string;
+
+    if (!signerKey) {
+      throw new UnauthorizedException('signer-key is missing');
+    }
 
     const signer = new ethers.Wallet(signerKey, this.provider);
     const contract = new ethers.Contract(

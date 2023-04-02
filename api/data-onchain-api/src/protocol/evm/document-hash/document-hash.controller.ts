@@ -3,9 +3,9 @@ import {
   Controller,
   Get,
   Header,
+  HttpStatus,
   Param,
   Post,
-  Req,
   Res,
 } from '@nestjs/common';
 import { DocumentHashService } from './document-hash.service';
@@ -17,34 +17,38 @@ export class DocumentHashController {
   @Post('/save-hash')
   @Header('Content-type', 'application/json')
   public async saveDocumentHash(@Body() payload, @Res() response) {
-    try {
-      const content = await this.documentService.saveDocumentHash(payload);
-      response.status(200).send(content);
-    } catch (err) {
-      response.status(500).send(err);
+    if (!payload) {
+      return response
+        .status(HttpStatus.BAD_REQUEST)
+        .send('payload cannot be empty');
     }
+
+    const content = await this.documentService.saveDocumentHash(payload);
+    response.status(HttpStatus.OK).send(content);
   }
 
   @Get('/:id/get-hash')
   @Header('Accept', 'text/plain')
   public async getDocumentBySalt(@Param('id') uuid: string, @Res() response) {
-    try {
-      const content = await this.documentService.getDocumentBySecred(uuid);
-      response.status(200).send(content);
-    } catch (err) {
-      response.status(500).send(err);
+    if (!uuid) {
+      return response
+        .status(HttpStatus.BAD_REQUEST)
+        .send('parameter UUID is required');
     }
+    const content = await this.documentService.getDocumentBySecred(uuid);
+    response.status(200).send(content);
   }
 
   @Get('/:id/get-content')
   @Header('Accept', 'text/plain')
   public async getDocumentContent(@Param('id') uuid: string, @Res() response) {
-    try {
-      const content = await this.documentService.getDocumentContent(uuid);
-      response.status(200).send(content);
-    } catch (err) {
-      response.status(500).send(err);
+    if (!uuid) {
+      return response
+        .status(HttpStatus.BAD_REQUEST)
+        .send('parameter UUID is required');
     }
+    const content = await this.documentService.getDocumentContent(uuid);
+    response.status(200).send(content);
   }
 
   @Get('user-document-hashes/:address')
@@ -52,13 +56,14 @@ export class DocumentHashController {
     @Param('address') address: string,
     @Res() response,
   ) {
-    try {
-      const content = await this.documentService.getDocumentHashesForUser(
-        address,
-      );
-      response.status(200).send(content);
-    } catch (err) {
-      response.status(500).send(err);
+    if (!address) {
+      return response
+        .status(HttpStatus.BAD_REQUEST)
+        .send('parameter address is required');
     }
+    const content = await this.documentService.getDocumentHashesForUser(
+      address,
+    );
+    response.status(200).send(content);
   }
 }

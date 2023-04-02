@@ -1,5 +1,5 @@
 import { Document } from './document-resource/document.entity';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DocumentHashController } from './protocol/evm/document-hash/document-hash.controller';
@@ -13,6 +13,7 @@ import { DocumentService } from './protocol/evm/document.service';
 import { DocumentResourceModule } from './document-resource/document-resource.module';
 import config from './config/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { LoggerMiddleware } from './middleware/logger.middleware';
 
 @Module({
   imports: [
@@ -38,4 +39,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     DocumentService,
   ],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

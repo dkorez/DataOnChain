@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Document } from './document.entity';
@@ -24,7 +24,7 @@ export class DocumentResourceService {
     });
 
     if (!document) {
-      throw new Error(`Document with UUID ${uuid} not fount`);
+      throw new NotFoundException(`Document with UUID ${uuid} not found`);
     }
 
     document.content = content;
@@ -38,7 +38,7 @@ export class DocumentResourceService {
     });
 
     if (!document) {
-      throw new Error(`Document with UUID ${uuid} not fount`);
+      throw new NotFoundException(`Document with UUID ${uuid} not fount`);
     }
 
     return document.content;

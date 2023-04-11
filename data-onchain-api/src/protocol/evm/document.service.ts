@@ -26,7 +26,7 @@ export class DocumentService {
     this.provider = new ethers.providers.JsonRpcProvider(this.rpcUrl);
   }
 
-  protected async getTxReceipt(txHash: string): Promise<any> {
+  public async getTxReceipt(txHash: string): Promise<any> {
     const rpcUrl = this.configService.get('RPC_URL');
     const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
 
@@ -39,7 +39,7 @@ export class DocumentService {
     }
   }
 
-  protected getContract(): Contract {
+  public getContract(): Contract {
     const { headers } = this.request;
     const signerKey = headers['signer-key'] as string;
 
@@ -57,7 +57,7 @@ export class DocumentService {
     return contract;
   }
 
-  protected getPublicContract(): Contract {
+  public getPublicContract(): Contract {
     const contract = new ethers.Contract(
       this.contractAddress,
       contractAbi,

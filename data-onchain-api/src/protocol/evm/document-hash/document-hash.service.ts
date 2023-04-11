@@ -8,15 +8,23 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { ethers } from 'ethers';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
 import { DocumentService } from '../document.service';
-import { DocumentResourceService } from 'src/document-resource/document-resource.service';
+import { DocumentResourceService } from './../../../document-resource/document-resource.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable({ scope: Scope.REQUEST })
 export class DocumentHashService extends DocumentService {
   private readonly logger = new Logger(DocumentHashService.name);
 
-  @Inject(DocumentResourceService)
-  private docResService: DocumentResourceService;
+  constructor(
+    protected configService: ConfigService,
+    @Inject(REQUEST) protected request: Request,
+    private readonly docResService: DocumentResourceService,
+  ) {
+    super(configService, request);
+  }
 
   /* implementation for document hashed only */
   public async saveDocumentHash(content: string): Promise<any> {
@@ -74,7 +82,7 @@ export class DocumentHashService extends DocumentService {
     }
 
     if (secret != decodedContent[2]) {
-      throw new UnprocessableEntityException('salt_not_match');
+      throw new UnprocessableEntityException('secret_not_match');
     }
 
     return decodedContent[1];

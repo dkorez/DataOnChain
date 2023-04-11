@@ -57,7 +57,7 @@ export class DocumentHashController {
   @ApiBadRequestResponse({ description: 'Bad request' })
   @Get('/:id/decode-offchain')
   @Header('Accept', 'text/plain')
-  public async getDocumentBySalt(@Param('id') uuid: string, @Res() response) {
+  public async getDocumentBySecred(@Param('id') uuid: string, @Res() response) {
     if (!uuid) {
       return response
         .status(HttpStatus.BAD_REQUEST)

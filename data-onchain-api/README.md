@@ -17,7 +17,7 @@ $ npm install
 $ docker build -t dkorez/data-onchain-api -f DockerfileDev .
 
 # Starting container
-$ docker run -p 9082:3000 dkorez/data-onchain-api
+$ docker run -p 3000:3000 dkorez/data-onchain-api
 ```
 
 ## Running the app

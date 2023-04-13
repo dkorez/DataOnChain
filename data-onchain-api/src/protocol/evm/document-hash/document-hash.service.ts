@@ -13,6 +13,7 @@ import { Request } from 'express';
 import { DocumentService } from '../document.service';
 import { DocumentResourceService } from './../../../document-resource/document-resource.service';
 import { ConfigService } from '@nestjs/config';
+import { DocumentDto } from 'src/protocol/dto/document.dto';
 
 @Injectable({ scope: Scope.REQUEST })
 export class DocumentHashService extends DocumentService {
@@ -27,7 +28,7 @@ export class DocumentHashService extends DocumentService {
   }
 
   /* implementation for document hashed only */
-  public async saveDocumentHash(content: string): Promise<any> {
+  public async saveDocumentHash(document: DocumentDto): Promise<any> {
     const contract = this.getContract();
     const uuidBytes = ethers.utils.randomBytes(32);
     const uuid = ethers.utils.hexlify(uuidBytes);
@@ -40,7 +41,7 @@ export class DocumentHashService extends DocumentService {
       const abi = ethers.utils.defaultAbiCoder;
       const encodedContent = abi.encode(
         ['bytes', 'string', 'bytes'],
-        [uuid, JSON.stringify(content), hashedSecret],
+        [uuid, JSON.stringify(document.data), hashedSecret],
       );
 
       await this.docResService.createDocument(uuid, encodedContent);

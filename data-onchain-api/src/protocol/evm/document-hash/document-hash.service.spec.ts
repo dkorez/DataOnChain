@@ -8,6 +8,7 @@ import { DocumentResourceService } from './../../../document-resource/document-r
 import { DocumentHashService } from './document-hash.service';
 import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
+import { DocumentDto } from 'src/protocol/dto/document.dto';
 
 describe('DocumentService', () => {
   let documentHashService: DocumentHashService;
@@ -39,7 +40,10 @@ describe('DocumentService', () => {
 
   describe('saveDocumentHash', () => {
     it('should generate a new document secret and save the document content', async () => {
-      const content = 'some content';
+      const document: DocumentDto = {
+        data: 'some content',
+        type: 'text/plain',
+      };
       const uuid = ethers.utils.formatBytes32String('validuuid');
       const secret = ethers.utils.formatBytes32String('secret');
 
@@ -62,11 +66,11 @@ describe('DocumentService', () => {
         .spyOn(docResourceService, 'createDocument')
         .mockResolvedValue(undefined);
 
-      const result = await documentHashService.saveDocumentHash(content);
+      const result = await documentHashService.saveDocumentHash(document);
 
       const encodedContent = ethers.utils.defaultAbiCoder.encode(
         ['bytes', 'string', 'bytes'],
-        [uuid, JSON.stringify(content), secret],
+        [uuid, JSON.stringify(document.data), secret],
       );
 
       expect(result).toEqual({

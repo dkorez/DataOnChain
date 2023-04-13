@@ -1,4 +1,4 @@
-import { SaveDocumentDto } from './../../dto/save-document.dto';
+import { DocumentDto } from '../../dto/document.dto';
 import {
   Body,
   Controller,
@@ -13,6 +13,7 @@ import { DocumentHashService } from './document-hash.service';
 import {
   ApiBadRequestResponse,
   ApiBody,
+  ApiConsumes,
   ApiOkResponse,
   ApiOperation,
   ApiSecurity,
@@ -31,20 +32,21 @@ export class DocumentHashController {
   })
   @ApiBody({
     description: 'any payload you want to save on blockchain',
-    type: SaveDocumentDto,
+    type: DocumentDto,
   })
   @ApiSecurity('Api-Key')
   @ApiOkResponse({ description: 'Document sucessfully saved', schema: {} })
   @ApiUnauthorizedResponse({ description: 'Unauthorised' })
   @ApiBadRequestResponse({ description: 'Bad request' })
-  @Post('/save-hash')
+  @ApiConsumes('application/json')
+  @Post('/save')
   @Header('Content-type', 'application/json')
   @Header('Accept', 'application/json')
   public async saveDocumentHash(
-    @Body() payload: SaveDocumentDto,
+    @Body() document: DocumentDto,
     @Res() response,
   ) {
-    const content = await this.documentService.saveDocumentHash(payload.data);
+    const content = await this.documentService.saveDocumentHash(document);
     response.status(HttpStatus.OK).send(content);
   }
 

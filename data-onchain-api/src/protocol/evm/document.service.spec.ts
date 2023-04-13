@@ -1,13 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
-import contractAbi from '../../abi/DataOnChain.json';
 import { ethers } from 'ethers';
 import { DocumentService } from './document.service';
 
 describe('DocumentService', () => {
   let documentService: DocumentService;
-  let configService: ConfigService;
 
   beforeAll(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -23,7 +21,6 @@ describe('DocumentService', () => {
     }).compile();
 
     documentService = await module.resolve<DocumentService>(DocumentService);
-    configService = await module.resolve<ConfigService>(ConfigService);
   });
 
   afterEach(() => {

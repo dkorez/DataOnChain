@@ -51,7 +51,7 @@ function setupLogger() {
   });
 
   return WinstonModule.createLogger({
-    transports: [errorTransport, combinedTransport, consoleTransport]
+    transports: [errorTransport, combinedTransport, consoleTransport],
   });
 }
 

@@ -10,6 +10,16 @@ This is a REST API for accessing and saving document on blockchain
 $ npm install
 ```
 
+## Running with docker
+
+```bash
+# Building an image
+$ docker build -t dkorez/data-onchain-api -f DockerfileDev .
+
+# Starting container
+$ docker run -p 9082:3000 dkorez/data-onchain-api
+```
+
 ## Running the app
 
 ```bash

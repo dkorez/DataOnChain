@@ -1,3 +1,4 @@
+import { HttpModule } from '@nestjs/axios';
 import { Document } from './document-resource/document.entity';
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
@@ -14,6 +15,11 @@ import { DocumentResourceModule } from './document-resource/document-resource.mo
 import config from './config/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { PinataService } from './pinata/pinata.service';
+import { PinataModule } from './pinata/pinata.module';
+import { DocumentHashIpfsController } from './protocol/evm/document-hash-ipfs/document-hash-ipfs.controller';
+import { DocumentHashIpfsService } from './protocol/evm/document-hash-ipfs/document-hash-ipfs.service';
+import { DocumentHashIpfsModule } from './protocol/evm/document-hash-ipfs/document-hash-ipfs.module';
 
 @Module({
   imports: [
@@ -28,15 +34,25 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
       synchronize: true,
     }),
     DocumentHashModule,
+    DocumentHashIpfsModule,
     FullDocumentModule,
     DocumentResourceModule,
+    PinataModule,
+    HttpModule,
   ],
-  controllers: [AppController, DocumentHashController, FullDocumentController],
+  controllers: [
+    AppController,
+    DocumentHashController,
+    DocumentHashIpfsController,
+    FullDocumentController,
+  ],
   providers: [
     AppService,
     DocumentHashService,
+    DocumentHashIpfsService,
     FullDocumentService,
     DocumentService,
+    PinataService,
   ],
 })
 export class AppModule {

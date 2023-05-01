@@ -1,9 +1,30 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ethers } from 'ethers';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
 import { DocumentService } from '../document.service';
+import contractAbi from '../../../abi/DataOnChainSimple.json';
+import { ContractSetup } from '../contract-setup';
 
 @Injectable()
 export class FullDocumentService extends DocumentService {
+  constructor(
+    protected configService: ConfigService,
+    @Inject(REQUEST) protected request: Request,
+  ) {
+    super(configService, request);
+
+    const rpcUrl = this.configService.get<string>('RPC_URL');
+    const contract = this.configService.get('CONTRACT.SIMPLE');
+    const contractSetup: ContractSetup = {
+      rpcUrl: rpcUrl,
+      contractAddress: contract,
+      contractAbi: contractAbi,
+    };
+    this.setup(contractSetup);
+  }
+
   public async getDocumentHashFull(id: number): Promise<string> {
     try {
       const contract = this.getContract();

@@ -8,27 +8,30 @@ import { ConfigService } from '@nestjs/config';
 import { Contract, ethers } from 'ethers';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import contractAbi from '../../abi/DataOnChain.json';
+import { ContractSetup } from './contract-setup';
 
 @Injectable({ scope: Scope.REQUEST })
 export class DocumentService {
   private provider: ethers.providers.JsonRpcProvider;
   private rpcUrl: string;
   private contractAddress: string;
+  private contractAbi: any;
 
   constructor(
     protected configService: ConfigService,
     @Inject(REQUEST) protected request: Request,
-  ) {
-    this.rpcUrl = this.configService.get('RPC_URL');
-    this.contractAddress = this.configService.get('ADDRESS');
+  ) {}
+
+  protected setup(contractSetup: ContractSetup) {
+    this.rpcUrl = contractSetup.rpcUrl;
+    this.contractAddress = contractSetup.contractAddress;
+    this.contractAbi = contractSetup.contractAbi;
 
     this.provider = new ethers.providers.JsonRpcProvider(this.rpcUrl);
   }
 
   public async getTxReceipt(txHash: string): Promise<any> {
-    const rpcUrl = this.configService.get('RPC_URL');
-    const provider = new ethers.providers.JsonRpcProvider(rpcUrl);
+    const provider = new ethers.providers.JsonRpcProvider(this.rpcUrl);
 
     try {
       const txReceipt = await provider.waitForTransaction(txHash);
@@ -50,7 +53,7 @@ export class DocumentService {
     const signer = new ethers.Wallet(signerKey, this.provider);
     const contract = new ethers.Contract(
       this.contractAddress,
-      contractAbi,
+      this.contractAbi,
       signer,
     );
 
@@ -60,7 +63,7 @@ export class DocumentService {
   public getPublicContract(): Contract {
     const contract = new ethers.Contract(
       this.contractAddress,
-      contractAbi,
+      this.contractAbi,
       this.provider,
     );
 

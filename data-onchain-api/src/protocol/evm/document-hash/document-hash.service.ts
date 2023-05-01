@@ -14,17 +14,26 @@ import { DocumentService } from '../document.service';
 import { DocumentResourceService } from './../../../document-resource/document-resource.service';
 import { ConfigService } from '@nestjs/config';
 import { DocumentDto } from 'src/protocol/dto/document.dto';
+import contractAbi from '../../../abi/DataOnChainHash.json';
+import { ContractSetup } from '../contract-setup';
 
 @Injectable({ scope: Scope.REQUEST })
 export class DocumentHashService extends DocumentService {
   private readonly logger = new Logger(DocumentHashService.name);
 
   constructor(
-    protected configService: ConfigService,
+    protected readonly configService: ConfigService,
     @Inject(REQUEST) protected request: Request,
     private readonly docResService: DocumentResourceService,
   ) {
     super(configService, request);
+
+    const contractSetup: ContractSetup = {
+      rpcUrl: this.configService.get('RPC_URL'),
+      contractAddress: this.configService.get('CONTRACT.HASH'),
+      contractAbi: contractAbi,
+    };
+    this.setup(contractSetup);
   }
 
   /* implementation for document hashed only */

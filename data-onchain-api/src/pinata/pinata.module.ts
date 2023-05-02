@@ -1,9 +1,9 @@
 import { HttpModule } from '@nestjs/axios';
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PinataService } from './pinata.service';
 
 @Module({
-  imports: [HttpModule],
+  imports: [forwardRef(() => HttpModule)],
   providers: [PinataService],
   exports: [PinataService],
 })

@@ -17,7 +17,7 @@ export class AppController {
   }
 
   @Post('test-ipfs/:uuid')
-  saveContentToIpfs(@Param('uuid') uuid): Promise<any> {
+  saveContentToIpfs(@Param('uuid') uuid: string): Promise<any> {
     const data = {
       data: 'come random content',
     };
@@ -26,7 +26,7 @@ export class AppController {
   }
 
   @Get('test-ipfs/:cid')
-  getContentFromIpfs(@Param('cid') cid): Promise<any> {
+  getContentFromIpfs(@Param('cid') cid: string): Promise<any> {
     return this.pinataService.getContentFromIPFS(cid);
   }
 }

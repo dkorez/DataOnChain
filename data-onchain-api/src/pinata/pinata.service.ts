@@ -13,7 +13,7 @@ export class PinataService {
   private apiSecret: string;
 
   constructor(
-    private readonly httpService: HttpService,
+    private httpService: HttpService,
     private configService: ConfigService,
   ) {
     this.pinataGateway = this.configService.get('PINATA_GATEWAY');
@@ -40,7 +40,7 @@ export class PinataService {
       const response = await this.client.pinJSONToIPFS(content, options);
       return response.IpfsHash;
     } catch (err) {
-      throw new InternalServerErrorException(err, 'error uploading to IPFS');
+      throw new InternalServerErrorException('error uploading to IPFS', err.message);
     }
   }
 
@@ -62,8 +62,8 @@ export class PinataService {
     } catch (err) {
       console.error(JSON.stringify(err));
       throw new InternalServerErrorException(
-        err,
         'error fetching content from IPFS',
+        err.message,
       );
     }
   }

@@ -19,7 +19,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { DocumentHashIpfsService } from './document-hash-ipfs.service';
-import { DocumentDto } from 'src/protocol/dto/document.dto';
+import { DocumentDto } from './../../../protocol/dto/document.dto';
 
 @ApiTags('EVM: Storing only document hashes')
 @Controller('evm/document-hash-ifps')

@@ -13,8 +13,9 @@ import { ConfigService } from '@nestjs/config';
 import { ContractSetup } from '../contract-setup';
 import contractAbi from '../../../abi/DataOnChainIpfs.json';
 import { ethers } from 'ethers';
-import { DocumentDto } from 'src/protocol/dto/document.dto';
+import { DocumentDto } from './../../../protocol/dto/document.dto';
 import { PinataService } from './../../../pinata/pinata.service';
+import { IpfsDocumentDto } from './../../../protocol/dto/ipfs.document.dto';
 
 @Injectable()
 export class DocumentHashIpfsService extends DocumentService {
@@ -54,20 +55,17 @@ export class DocumentHashIpfsService extends DocumentService {
         [uuid, JSON.stringify(document.data), hashedSecret],
       );
 
-      const data = {
-        data: encodedContent,
+      const data: IpfsDocumentDto = {
+        content: encodedContent,
       };
       const ipfsHash = await this.pinataService.pinContentToIPFS(data, uuid);
       const ipfsHashBytes = ethers.utils.toUtf8Bytes(ipfsHash);
 
-      console.log('calling updateDocument');
       await contract.updateDocument(uuid, ipfsHashBytes);
-      console.log('updateDocument executed');
 
       return {
         uuid: uuid,
         ipfs: ipfsHash,
-        content: encodedContent,
       };
     } catch (err) {
       this.logger.error(
@@ -96,12 +94,8 @@ export class DocumentHashIpfsService extends DocumentService {
     }
 
     const ipfs = ethers.utils.toUtf8String(ipfsBytes);
-
-    console.log(`secret: ${secret}`);
-    console.log(`ipfsBytes: ${ipfsBytes}`);
-    console.log(`ipfs: ${ipfs}`);
-
-    const encodedContent = await this.pinataService.getContentFromIPFS(ipfs);
+    const ipfsDocument: IpfsDocumentDto = await this.pinataService.getContentFromIPFS(ipfs);
+    const encodedContent = ipfsDocument.content;
 
     const abi = ethers.utils.defaultAbiCoder;
     const decodedContent = abi.decode(
@@ -150,6 +144,7 @@ export class DocumentHashIpfsService extends DocumentService {
 
   public async getDocumentHashesForUser(user: string): Promise<any> {
     const contract = this.getPublicContract();
+    
     try {
       const documents = await contract.getDocumentHashesForUser(user);
       return documents;
